@@ -15,8 +15,8 @@ export default function App() {
     <ThemeProvider defaultTheme="dark" storageKey="gdhardy-theme">
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<DashboardPage />} />
+        <Route element={<DashboardLayout />}>
+          <Route path="/overview" element={<DashboardPage />} />
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="chatbots" element={<ChatbotManagementPage />} />
           <Route path="namespaces" element={<NamespaceManagementPage />} />
@@ -25,6 +25,6 @@ export default function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
       <Toaster />
-    </ThemeProvider>
+    </ThemeProvider >
   )
 }

@@ -1,288 +1,215 @@
-import React, { useState } from "react"
-import { Users, Pencil, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
+import React from "react"
+import { Bot, Users, MessageSquare, Layers, Shield, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table"
 
-type Staff = {
-  number: string
-  name: string
-  email: string
-  role: string
-  status: "Active" | "Inactive"
-}
-
-// Example data
-const initialStaffMembers: Staff[] = [
-  {
-    number: "001",
-    name: "John Doe",
-    email: "john.doe@gdhardy.com",
-    role: "Administrator",
-    status: "Active",
-  },
-  {
-    number: "002",
-    name: "Jane Smith",
-    email: "jane.smith@gdhardy.com",
-    role: "Manager",
-    status: "Active",
-  },
-  {
-    number: "003",
-    name: "Robert Johnson",
-    email: "robert.johnson@gdhardy.com",
-    role: "Support Agent",
-    status: "Inactive",
-  },
-  {
-    number: "004",
-    name: "Emily Davis",
-    email: "emily.davis@gdhardy.com",
-    role: "Support Agent",
-    status: "Active",
-  },
-  {
-    number: "005",
-    name: "Michael Wilson",
-    email: "michael.wilson@gdhardy.com",
-    role: "Manager",
-    status: "Active",
-  },
+// Sample data for charts
+const botUsageData = [
+  { name: 'Mon', messages: 1200 },
+  { name: 'Tue', messages: 1800 },
+  { name: 'Wed', messages: 1600 },
+  { name: 'Thu', messages: 2100 },
+  { name: 'Fri', messages: 1900 },
+  { name: 'Sat', messages: 1000 },
+  { name: 'Sun', messages: 800 },
 ]
 
-export default function StaffManagementPage() {
-  const { toast } = useToast()
-  const [staffMembers, setStaffMembers] = useState<Staff[]>(initialStaffMembers)
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
-  const [formData, setFormData] = useState<Partial<Staff>>({
-    name: "",
-    email: "",
-    role: "",
-    status: "Active",
-  })
+const namespaceUsageData = [
+  { name: 'Customer Support', usage: 850 },
+  { name: 'Sales Knowledge', usage: 620 },
+  { name: 'Technical Docs', usage: 540 },
+  { name: 'Product Specs', usage: 480 },
+]
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+const recentInteractions = [
+  { id: 1, bot: 'Customer Support Bot', user: 'john@example.com', time: '5 mins ago', status: 'success' },
+  { id: 2, bot: 'Sales Assistant', user: 'sarah@example.com', time: '12 mins ago', status: 'success' },
+  { id: 3, bot: 'Technical Support', user: 'mike@example.com', time: '25 mins ago', status: 'failed' },
+  { id: 4, bot: 'Product Advisor', user: 'emma@example.com', time: '32 mins ago', status: 'success' },
+]
 
-  const handleAddStaff = () => {
-    const newStaff: Staff = {
-      number: String(staffMembers.length + 1).padStart(3, "0"),
-      name: formData.name!,
-      email: formData.email!,
-      role: formData.role!,
-      status: formData.status as "Active" | "Inactive",
-    }
-    setStaffMembers([...staffMembers, newStaff])
-    setIsAddModalOpen(false)
-    setFormData({
-      name: "",
-      email: "",
-      role: "",
-      status: "Active",
-    })
-    toast({
-      title: "Staff Added",
-      description: "New staff member has been added successfully.",
-    })
-  }
-
-  const handleEditStaff = () => {
-    if (!selectedStaff) return
-    const updatedStaffMembers = staffMembers.map((staff) =>
-      staff.number === selectedStaff.number
-        ? {
-          ...staff,
-          name: formData.name || staff.name,
-          email: formData.email || staff.email,
-          role: formData.role || staff.role,
-          status: (formData.status as "Active" | "Inactive") || staff.status,
-        }
-        : staff
-    )
-    setStaffMembers(updatedStaffMembers)
-    setIsEditModalOpen(false)
-    setSelectedStaff(null)
-    toast({
-      title: "Staff Updated",
-      description: "Staff member has been updated successfully.",
-    })
-  }
-
-  const handleDeleteStaff = (staff: Staff) => {
-    const updatedStaffMembers = staffMembers.filter((s) => s.number !== staff.number)
-    setStaffMembers(updatedStaffMembers)
-    toast({
-      title: "Staff Deleted",
-      description: "Staff member has been deleted successfully.",
-      variant: "destructive",
-    })
-  }
-
-  const openEditModal = (staff: Staff) => {
-    setSelectedStaff(staff)
-    setFormData({
-      name: staff.name,
-      email: staff.email,
-      role: staff.role,
-      status: staff.status,
-    })
-    setIsEditModalOpen(true)
-  }
-
-  const StaffModal = ({ isEdit = false }) => (
-    <Dialog
-      open={isEdit ? isEditModalOpen : isAddModalOpen}
-      onOpenChange={isEdit ? setIsEditModalOpen : setIsAddModalOpen}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Staff Member" : "Add New Staff Member"}</DialogTitle>
-          <DialogDescription>
-            {isEdit
-              ? "Update the staff member's information below."
-              : "Fill in the information for the new staff member."}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Enter name"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter email"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="role">Role</Label>
-            <Input
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-              placeholder="Enter role"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="status">Status</Label>
-            <select
-              id="status"
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => (isEdit ? setIsEditModalOpen(false) : setIsAddModalOpen(false))}
-          >
-            Cancel
-          </Button>
-          <Button onClick={isEdit ? handleEditStaff : handleAddStaff}>
-            {isEdit ? "Save Changes" : "Add Staff"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-
-  return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Staff Management</h1>
-        <Button onClick={() => setIsAddModalOpen(true)}>Add Staff Member</Button>
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-popover p-2 rounded-lg border shadow-sm">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-sm text-muted-foreground">
+          {payload[0].name === "messages" ? "Messages: " : "Usage: "}
+          {payload[0].value}
+        </p>
       </div>
+    )
+  }
+  return null
+}
+
+export default function DashboardPage() {
+  return (
+    <div className="p-8 space-y-8">
+      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+
+      {/* Stats Overview */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Total Staff</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">12</div>
+            <div className="text-xs text-muted-foreground">
+              <span className="text-emerald-500 dark:text-emerald-400 inline-flex items-center">
+                <ArrowUpRight className="h-3 w-3 mr-1" />
+                +2 this month
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Active Chatbots</CardTitle>
+            <Bot className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">8</div>
+            <div className="text-xs text-muted-foreground">
+              <span className="text-emerald-500 dark:text-emerald-400 inline-flex items-center">
+                <TrendingUp className="h-3 w-3 mr-1" />
+                All operational
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Namespaces</CardTitle>
+            <Layers className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">5</div>
+            <div className="text-xs text-muted-foreground">
+              <span className="text-emerald-500 dark:text-emerald-400 inline-flex items-center">
+                <ArrowUpRight className="h-3 w-3 mr-1" />
+                +1 this week
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Total Messages</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">9,432</div>
+            <div className="text-xs text-muted-foreground">
+              <span className="text-red-500 dark:text-red-400 inline-flex items-center">
+                <ArrowDownRight className="h-3 w-3 mr-1" />
+                -5% from yesterday
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Bot Usage Over Time</CardTitle>
+            <CardDescription>Messages processed per day</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={botUsageData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis
+                    dataKey="name"
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fill: "hsl(var(--muted-foreground))" }}
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fill: "hsl(var(--muted-foreground))" }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line
+                    type="monotone"
+                    dataKey="messages"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Namespaces</CardTitle>
+            <CardDescription>Usage by namespace</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={namespaceUsageData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis
+                    dataKey="name"
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fill: "hsl(var(--muted-foreground))" }}
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fill: "hsl(var(--muted-foreground))" }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar
+                    dataKey="usage"
+                    fill="hsl(var(--primary))"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Interactions Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Staff Members</CardTitle>
+          <CardTitle>Recent Interactions</CardTitle>
+          <CardDescription>Latest bot-user interactions</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Number</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
+                <TableHead>Bot</TableHead>
+                <TableHead>User</TableHead>
+                <TableHead>Time</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {staffMembers.map((staff) => (
-                <TableRow key={staff.number}>
-                  <TableCell className="font-medium">{staff.number}</TableCell>
-                  <TableCell>{staff.name}</TableCell>
-                  <TableCell>{staff.email}</TableCell>
-                  <TableCell>{staff.role}</TableCell>
+              {recentInteractions.map((interaction) => (
+                <TableRow key={interaction.id}>
+                  <TableCell className="font-medium">{interaction.bot}</TableCell>
+                  <TableCell>{interaction.user}</TableCell>
+                  <TableCell>{interaction.time}</TableCell>
                   <TableCell>
                     <span
-                      className={cn(
-                        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                        staff.status === "Active"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                      )}
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${interaction.status === 'success'
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : 'bg-red-500/20 text-red-400'
+                        }`}
                     >
-                      {staff.status}
+                      {interaction.status}
                     </span>
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openEditModal(staff)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteStaff(staff)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -290,13 +217,6 @@ export default function StaffManagementPage() {
           </Table>
         </CardContent>
       </Card>
-      <StaffModal isEdit={false} />
-      <StaffModal isEdit={true} />
     </div>
   )
-}
-
-// Helper function for conditional class names
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ")
 }

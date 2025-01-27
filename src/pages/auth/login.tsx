@@ -33,7 +33,7 @@ export default function LoginPage() {
         description: "Welcome back!",
       })
       // Redirect to dashboard after successful login
-      navigate("/dashboard")
+      navigate("/overview")
     } catch (error) {
       toast({
         variant: "destructive",

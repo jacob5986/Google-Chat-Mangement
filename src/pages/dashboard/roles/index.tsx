@@ -82,11 +82,7 @@ export default function RoleManagementPage() {
       level: formData.level || 1,
     }
     setRoles([...roles, newRole])
-    setIsAddModalOpen(false)
-    setFormData({
-      name: "",
-      level: 1,
-    })
+    handleCloseModal(false)
     toast({
       title: "Role Added",
       description: "New role has been added successfully.",
@@ -105,8 +101,7 @@ export default function RoleManagementPage() {
         : role
     )
     setRoles(updatedRoles)
-    setIsEditModalOpen(false)
-    setSelectedRole(null)
+    handleCloseModal(true)
     toast({
       title: "Role Updated",
       description: "Role has been updated successfully.",
@@ -132,6 +127,19 @@ export default function RoleManagementPage() {
     setIsEditModalOpen(true)
   }
 
+  const handleCloseModal = (isEdit: boolean) => {
+    if (isEdit) {
+      setIsEditModalOpen(false)
+      setSelectedRole(null)
+    } else {
+      setIsAddModalOpen(false)
+    }
+    setFormData({
+      name: "",
+      level: 1,
+    })
+  }
+
   const getLevelColor = (level: number) => {
     switch (level) {
       case 5:
@@ -146,66 +154,6 @@ export default function RoleManagementPage() {
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
     }
   }
-
-  const RoleModal = ({ isEdit = false }) => (
-    <Dialog
-      open={isEdit ? isEditModalOpen : isAddModalOpen}
-      onOpenChange={isEdit ? setIsEditModalOpen : setIsAddModalOpen}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Role" : "Add New Role"}</DialogTitle>
-          <DialogDescription>
-            {isEdit
-              ? "Update the role's information below."
-              : "Fill in the information for the new role."}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Role Name</Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Enter role name"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="level">Role Level</Label>
-            <select
-              id="level"
-              name="level"
-              value={formData.level}
-              onChange={handleInputChange}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
-            >
-              <option value="1">Level 1 (Viewer)</option>
-              <option value="2">Level 2</option>
-              <option value="3">Level 3 (Team Lead)</option>
-              <option value="4">Level 4 (Manager)</option>
-              <option value="5">Level 5 (Administrator)</option>
-            </select>
-            <p className="text-sm text-muted-foreground">
-              Level 5: Administrator, Level 1: Viewer
-            </p>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => (isEdit ? setIsEditModalOpen(false) : setIsAddModalOpen(false))}
-          >
-            Cancel
-          </Button>
-          <Button onClick={isEdit ? handleEditRole : handleAddRole}>
-            {isEdit ? "Save Changes" : "Add Role"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
 
   return (
     <div className="p-8">
@@ -264,8 +212,104 @@ export default function RoleManagementPage() {
           </Table>
         </CardContent>
       </Card>
-      <RoleModal isEdit={false} />
-      <RoleModal isEdit={true} />
+
+      {/* Add Modal */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Role</DialogTitle>
+            <DialogDescription>
+              Fill in the information for the new role.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Role Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Enter role name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="level">Role Level</Label>
+              <select
+                id="level"
+                name="level"
+                value={formData.level}
+                onChange={handleInputChange}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
+              >
+                <option value="1">Level 1 (Viewer)</option>
+                <option value="2">Level 2</option>
+                <option value="3">Level 3 (Team Lead)</option>
+                <option value="4">Level 4 (Manager)</option>
+                <option value="5">Level 5 (Administrator)</option>
+              </select>
+              <p className="text-sm text-muted-foreground">
+                Level 5: Administrator, Level 1: Viewer
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleCloseModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddRole}>Add Role</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Role</DialogTitle>
+            <DialogDescription>
+              Update the role's information below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Role Name</Label>
+              <Input
+                id="edit-name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Enter role name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-level">Role Level</Label>
+              <select
+                id="edit-level"
+                name="level"
+                value={formData.level}
+                onChange={handleInputChange}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
+              >
+                <option value="1">Level 1 (Viewer)</option>
+                <option value="2">Level 2</option>
+                <option value="3">Level 3 (Team Lead)</option>
+                <option value="4">Level 4 (Manager)</option>
+                <option value="5">Level 5 (Administrator)</option>
+              </select>
+              <p className="text-sm text-muted-foreground">
+                Level 5: Administrator, Level 1: Viewer
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleCloseModal(true)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditRole}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

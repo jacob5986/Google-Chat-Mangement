@@ -9,29 +9,29 @@ import { useToast } from "@/components/ui/use-toast"
 
 const routes = [
   {
-    title: "Dashboard",
+    title: "Overview",
     icon: LayoutDashboard,
-    href: "/dashboard",
+    href: "/overview",
   },
   {
     title: "Staff Management",
     icon: Users,
-    href: "/dashboard/staff",
+    href: "/staff",
   },
   {
     title: "Chatbot Management",
     icon: Bot,
-    href: "/dashboard/chatbots",
+    href: "/chatbots",
   },
   {
     title: "Namespaces",
     icon: Layers,
-    href: "/dashboard/namespaces",
+    href: "/namespaces",
   },
   {
     title: "Role Management",
     icon: Shield,
-    href: "/dashboard/roles",
+    href: "/roles",
   },
 ]
 
@@ -66,8 +66,8 @@ export function Sidebar() {
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                  isActive 
-                    ? "bg-accent text-accent-foreground" 
+                  isActive
+                    ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground"
                 )
               }

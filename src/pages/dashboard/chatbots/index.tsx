@@ -87,12 +87,7 @@ export default function ChatbotManagementPage() {
       status: formData.status as "Online" | "Offline" | "Maintenance",
     }
     setChatbots([...chatbots, newBot])
-    setIsAddModalOpen(false)
-    setFormData({
-      name: "",
-      role: "",
-      status: "Online",
-    })
+    handleCloseModal(false)
     toast({
       title: "Chatbot Added",
       description: "New chatbot has been added successfully.",
@@ -112,8 +107,7 @@ export default function ChatbotManagementPage() {
         : bot
     )
     setChatbots(updatedChatbots)
-    setIsEditModalOpen(false)
-    setSelectedBot(null)
+    handleCloseModal(true)
     toast({
       title: "Chatbot Updated",
       description: "Chatbot has been updated successfully.",
@@ -140,6 +134,20 @@ export default function ChatbotManagementPage() {
     setIsEditModalOpen(true)
   }
 
+  const handleCloseModal = (isEdit: boolean) => {
+    if (isEdit) {
+      setIsEditModalOpen(false)
+      setSelectedBot(null)
+    } else {
+      setIsAddModalOpen(false)
+    }
+    setFormData({
+      name: "",
+      role: "",
+      status: "Online",
+    })
+  }
+
   const getStatusColor = (status: Chatbot["status"]) => {
     switch (status) {
       case "Online":
@@ -152,71 +160,6 @@ export default function ChatbotManagementPage() {
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
     }
   }
-
-  const ChatbotModal = ({ isEdit = false }) => (
-    <Dialog
-      open={isEdit ? isEditModalOpen : isAddModalOpen}
-      onOpenChange={isEdit ? setIsEditModalOpen : setIsAddModalOpen}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Chatbot" : "Add New Chatbot"}</DialogTitle>
-          <DialogDescription>
-            {isEdit
-              ? "Update the chatbot's information below."
-              : "Fill in the information for the new chatbot."}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Bot Name</Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Enter bot name"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="role">Bot Role</Label>
-            <Input
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-              placeholder="Enter bot role"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="status">Status</Label>
-            <select
-              id="status"
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
-            >
-              <option value="Online">Online</option>
-              <option value="Offline">Offline</option>
-              <option value="Maintenance">Maintenance</option>
-            </select>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => (isEdit ? setIsEditModalOpen(false) : setIsAddModalOpen(false))}
-          >
-            Cancel
-          </Button>
-          <Button onClick={isEdit ? handleEditBot : handleAddBot}>
-            {isEdit ? "Save Changes" : "Add Chatbot"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
 
   return (
     <div className="p-8">
@@ -277,13 +220,118 @@ export default function ChatbotManagementPage() {
           </Table>
         </CardContent>
       </Card>
-      <ChatbotModal isEdit={false} />
-      <ChatbotModal isEdit={true} />
+
+      {/* Add Modal */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Chatbot</DialogTitle>
+            <DialogDescription>
+              Fill in the information for the new chatbot.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Bot Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Enter bot name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="role">Bot Role</Label>
+              <Input
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                placeholder="Enter bot role"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <select
+                id="status"
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
+              >
+                <option value="Online">Online</option>
+                <option value="Offline">Offline</option>
+                <option value="Maintenance">Maintenance</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleCloseModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddBot}>Add Chatbot</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Chatbot</DialogTitle>
+            <DialogDescription>
+              Update the chatbot's information below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Bot Name</Label>
+              <Input
+                id="edit-name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Enter bot name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-role">Bot Role</Label>
+              <Input
+                id="edit-role"
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                placeholder="Enter bot role"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-status">Status</Label>
+              <select
+                id="edit-status"
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
+              >
+                <option value="Online">Online</option>
+                <option value="Offline">Offline</option>
+                <option value="Maintenance">Maintenance</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleCloseModal(true)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditBot}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
 
-// Helper function for conditional class names
 function cn(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(" ")
 }

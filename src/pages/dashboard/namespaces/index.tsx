@@ -98,12 +98,7 @@ export default function NamespaceManagementPage() {
       members: [],
     }
     setNamespaces([...namespaces, newNamespace])
-    setIsAddModalOpen(false)
-    setFormData({
-      name: "",
-      documentTitle: "",
-      members: [],
-    })
+    handleCloseModal(false)
     toast({
       title: "Namespace Added",
       description: "New namespace has been added successfully.",
@@ -115,15 +110,14 @@ export default function NamespaceManagementPage() {
     const updatedNamespaces = namespaces.map((ns) =>
       ns.number === selectedNamespace.number
         ? {
-            ...ns,
-            name: formData.name || ns.name,
-            documentTitle: formData.documentTitle || ns.documentTitle,
-          }
+          ...ns,
+          name: formData.name || ns.name,
+          documentTitle: formData.documentTitle || ns.documentTitle,
+        }
         : ns
     )
     setNamespaces(updatedNamespaces)
-    setIsEditModalOpen(false)
-    setSelectedNamespace(null)
+    handleCloseModal(true)
     toast({
       title: "Namespace Updated",
       description: "Namespace has been updated successfully.",
@@ -150,6 +144,20 @@ export default function NamespaceManagementPage() {
     setIsEditModalOpen(true)
   }
 
+  const handleCloseModal = (isEdit: boolean) => {
+    if (isEdit) {
+      setIsEditModalOpen(false)
+      setSelectedNamespace(null)
+    } else {
+      setIsAddModalOpen(false)
+    }
+    setFormData({
+      name: "",
+      documentTitle: "",
+      members: [],
+    })
+  }
+
   const openMemberModal = (namespace: Namespace) => {
     setSelectedNamespace(namespace)
     setIsMemberModalOpen(true)
@@ -160,9 +168,9 @@ export default function NamespaceManagementPage() {
     const updatedNamespaces = namespaces.map((ns) =>
       ns.number === selectedNamespace.number
         ? {
-            ...ns,
-            members: [...ns.members, { ...member, addedAt: Date.now() }],
-          }
+          ...ns,
+          members: [...ns.members, { ...member, addedAt: Date.now() }],
+        }
         : ns
     )
     setNamespaces(updatedNamespaces)
@@ -176,9 +184,9 @@ export default function NamespaceManagementPage() {
     const updatedNamespaces = namespaces.map((ns) =>
       ns.number === namespace.number
         ? {
-            ...ns,
-            members: ns.members.filter((m) => m.id !== member.id),
-          }
+          ...ns,
+          members: ns.members.filter((m) => m.id !== member.id),
+        }
         : ns
     )
     setNamespaces(updatedNamespaces)
@@ -187,157 +195,6 @@ export default function NamespaceManagementPage() {
       description: `${member.name} has been removed from ${namespace.name}.`,
     })
   }
-
-  const NamespaceModal = ({ isEdit = false }) => (
-    <Dialog
-      open={isEdit ? isEditModalOpen : isAddModalOpen}
-      onOpenChange={isEdit ? setIsEditModalOpen : setIsAddModalOpen}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Namespace" : "Add New Namespace"}</DialogTitle>
-          <DialogDescription>
-            {isEdit
-              ? "Update the namespace information below."
-              : "Fill in the information for the new namespace."}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Namespace Name</Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Enter namespace name"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="documentTitle">Document Title</Label>
-            <Input
-              id="documentTitle"
-              name="documentTitle"
-              value={formData.documentTitle}
-              onChange={handleInputChange}
-              placeholder="Enter document title"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => (isEdit ? setIsEditModalOpen(false) : setIsAddModalOpen(false))}
-          >
-            Cancel
-          </Button>
-          <Button onClick={isEdit ? handleEditNamespace : handleAddNamespace}>
-            {isEdit ? "Save Changes" : "Add Namespace"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-
-  const MemberModal = () => (
-    <Dialog open={isMemberModalOpen} onOpenChange={setIsMemberModalOpen}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Manage Members</DialogTitle>
-          <DialogDescription>
-            Add or remove members from {selectedNamespace?.name}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <h3 className="font-semibold">Available Members</h3>
-          <div className="grid gap-2">
-            {availableMembers
-              .filter(
-                (member) =>
-                  !selectedNamespace?.members.find((m) => m.id === member.id)
-              )
-              .map((member) => (
-                <div
-                  key={`available-${member.id}`}
-                  className="flex items-center justify-between p-2 border rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium">{member.name}</p>
-                    <p className="text-sm text-muted-foreground">{member.email}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleAddMember(member)}
-                  >
-                    <UserPlus className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsMemberModalOpen(false)}>
-            Close
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-
-  const MemberListModal = () => (
-    <Dialog open={isMemberListModalOpen} onOpenChange={setIsMemberListModalOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Members of {selectedNamespace?.name}</DialogTitle>
-          <DialogDescription>
-            Current members and their details
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          {selectedNamespace?.members.map((member) => (
-            <div
-              key={`list-${member.id}-${member.addedAt}`}
-              className="flex items-center justify-between p-3 border rounded-lg"
-            >
-              <div>
-                <p className="font-medium">{member.name}</p>
-                <p className="text-sm text-muted-foreground">{member.email}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  if (selectedNamespace) {
-                    handleRemoveMember(selectedNamespace, member)
-                  }
-                }}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                <UserMinus className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-        <DialogFooter className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={() => {
-              if (selectedNamespace) {
-                setIsMemberListModalOpen(false)
-                openMemberModal(selectedNamespace)
-              }
-            }}
-          >
-            Add Members
-          </Button>
-          <Button onClick={() => setIsMemberListModalOpen(false)}>
-            Close
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
 
   return (
     <div className="p-8">
@@ -402,10 +259,184 @@ export default function NamespaceManagementPage() {
           </Table>
         </CardContent>
       </Card>
-      <NamespaceModal isEdit={false} />
-      <NamespaceModal isEdit={true} />
-      <MemberModal />
-      <MemberListModal />
+
+      {/* Add Modal */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Namespace</DialogTitle>
+            <DialogDescription>
+              Fill in the information for the new namespace.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Namespace Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Enter namespace name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="documentTitle">Document Title</Label>
+              <Input
+                id="documentTitle"
+                name="documentTitle"
+                value={formData.documentTitle}
+                onChange={handleInputChange}
+                placeholder="Enter document title"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleCloseModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddNamespace}>Add Namespace</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Namespace</DialogTitle>
+            <DialogDescription>
+              Update the namespace information below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Namespace Name</Label>
+              <Input
+                id="edit-name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Enter namespace name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-documentTitle">Document Title</Label>
+              <Input
+                id="edit-documentTitle"
+                name="documentTitle"
+                value={formData.documentTitle}
+                onChange={handleInputChange}
+                placeholder="Enter document title"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleCloseModal(true)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditNamespace}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Member Modal */}
+      <Dialog open={isMemberModalOpen} onOpenChange={setIsMemberModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Manage Members</DialogTitle>
+            <DialogDescription>
+              Add or remove members from {selectedNamespace?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <h3 className="font-semibold">Available Members</h3>
+            <div className="grid gap-2">
+              {availableMembers
+                .filter(
+                  (member) =>
+                    !selectedNamespace?.members.find((m) => m.id === member.id)
+                )
+                .map((member) => (
+                  <div
+                    key={`available-${member.id}`}
+                    className="flex items-center justify-between p-2 border rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium">{member.name}</p>
+                      <p className="text-sm text-muted-foreground">{member.email}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleAddMember(member)}
+                    >
+                      <UserPlus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsMemberModalOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Member List Modal */}
+      <Dialog open={isMemberListModalOpen} onOpenChange={setIsMemberListModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Members of {selectedNamespace?.name}</DialogTitle>
+            <DialogDescription>
+              Current members and their details
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {selectedNamespace?.members.map((member) => (
+              <div
+                key={`list-${member.id}-${member.addedAt}`}
+                className="flex items-center justify-between p-3 border rounded-lg"
+              >
+                <div>
+                  <p className="font-medium">{member.name}</p>
+                  <p className="text-sm text-muted-foreground">{member.email}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (selectedNamespace) {
+                      handleRemoveMember(selectedNamespace, member)
+                    }
+                  }}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <UserMinus className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <DialogFooter className="flex justify-between">
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (selectedNamespace) {
+                  setIsMemberListModalOpen(false)
+                  openMemberModal(selectedNamespace)
+                }
+              }}
+            >
+              Add Members
+            </Button>
+            <Button onClick={() => setIsMemberListModalOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
